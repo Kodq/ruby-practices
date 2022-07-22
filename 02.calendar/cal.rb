@@ -27,6 +27,3 @@ range.each do |day|
     puts()
   end
 end
-
-
-

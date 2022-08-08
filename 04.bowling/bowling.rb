@@ -1,5 +1,14 @@
 # frozen_string_literal: true
 
+def main
+  score = ARGV[0]
+  scores = score.split(',')
+
+  shots = char_to_num(scores)
+  frames = sort_frames(split_frames(shots))
+  score_cal(frames)
+end
+
 def char_to_num(scores)
   shots = []
   scores.each do |s|
@@ -63,9 +72,4 @@ def score_cal(frames)
   puts sum
 end
 
-score = ARGV[0]
-scores = score.split(',')
-
-shots = char_to_num(scores)
-frames = sort_frames(split_frames(shots))
-score_cal(frames)
+main

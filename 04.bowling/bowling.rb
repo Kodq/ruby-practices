@@ -4,12 +4,12 @@ def main
   score = ARGV[0]
   scores = score.split(',')
 
-  shots = char_to_num(scores)
-  frames = sort_frames(split_frames(shots))
-  score_cal(frames)
+  shots = make_shots(scores)
+  frames = split_frames(shots)
+  show_score(frames)
 end
 
-def char_to_num(scores)
+def to_number(scores)
   shots = []
   scores.each do |s|
     if s == 'X'
@@ -23,53 +23,30 @@ def char_to_num(scores)
 end
 
 def split_frames(shots)
-  frames = []
-  shots.each_slice(2) do |s|
-    frames << s
+  sliced_shots = shots.each_slice(2).to_a
+
+  sliced_shots.each do |frames|
+    frames.pop if frames[0] == 10
   end
-  frames
+  sliced_shots[0..8] + [sliced_shots[9..].flatten]
 end
 
-def sort_frames(frames)
-  i = 0
-
-  frames.each do
-    frames[i].pop if frames[i][0] == 10
-    i += 1
-  end
-
-  case frames.size
-  when 11
-    frames[9].concat(frames.pop)
-  when 12
-    2.times do
-      frames[9].concat(frames.pop)
-    end
-  end
-  frames
-end
-
-def score_cal(frames)
-  j = 0
+def show_score(frames)
   sum = 0
-  num = 0
 
-  while j <= 8
-    if frames[j][0] == 10
-      sum += frames.flatten[num] + frames.flatten[num + 1] + frames.flatten[num + 2]
-      num += 1
-    elsif frames[j].sum == 10
-      sum += frames[j].sum + frames[j + 1][0]
-      num += 2
+  frames[0..8].each_with_index do |point, i|
+    if point[0] == 10
+      flat_frames = frames.flatten
+      throw_frames = frames[0..i].map(&:size).sum
+      sum += point.sum + flat_frames[throw_frames] + flat_frames[throw_frames + 1]
+    elsif point.sum == 10
+      sum += point.sum + frames[i + 1][0]
     else
-      sum += frames[j].sum
-      num += 2
+      sum += point.sum
     end
-    j += 1
   end
 
-  sum += frames[j].sum
-  puts sum
+  puts sum += frames[9].sum
 end
 
 main

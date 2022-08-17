@@ -4,7 +4,7 @@ def main
   score = ARGV[0]
   scores = score.split(',')
 
-  shots = make_shots(scores)
+  shots = to_number(scores)
   frames = split_frames(shots)
   show_score(frames)
 end

@@ -4,12 +4,12 @@ def main
   score = ARGV[0]
   scores = score.split(',')
 
-  shots = to_number(scores)
+  shots = make_shots(scores)
   frames = split_frames(shots)
   show_score(frames)
 end
 
-def to_number(scores)
+def make_shots(scores)
   shots = []
   scores.each do |s|
     if s == 'X'

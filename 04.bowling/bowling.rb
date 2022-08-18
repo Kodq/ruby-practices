@@ -32,21 +32,21 @@ def split_frames(shots)
 end
 
 def show_score(frames)
-  sum = 0
-
-  frames[0..8].each_with_index do |point, i|
-    if point[0] == 10
-      flat_frames = frames.flatten
-      throw_frames = frames[0..i].map(&:size).sum
-      sum += point.sum + flat_frames[throw_frames] + flat_frames[throw_frames + 1]
-    elsif point.sum == 10
-      sum += point.sum + frames[i + 1][0]
-    else
-      sum += point.sum
+  all_shots = frames.flatten
+  frame_scores =
+    frames.map.with_index do |shots, i|
+      if i == 9
+        shots.sum
+      elsif shots[0] == 10
+        shot_count = frames[0..i].map(&:size).sum
+        shots.sum + all_shots[shot_count] + all_shots[shot_count + 1]
+      elsif shots.sum == 10
+        shots.sum + frames[i + 1][0]
+      else
+        shots.sum
+      end
     end
-  end
-
-  puts sum += frames[9].sum
+  puts(frame_scores.sum)
 end
 
 main

@@ -33,8 +33,8 @@ end
 
 def show_score(frames)
   all_shots = frames.flatten
-  frame_scores =
-    frames.map.with_index do |shots, i|
+  total_scores =
+    frames.each_with_index.sum do |shots, i|
       if i == 9
         shots.sum
       elsif shots[0] == 10
@@ -46,7 +46,7 @@ def show_score(frames)
         shots.sum
       end
     end
-  puts(frame_scores.sum)
+  puts(total_scores)
 end
 
 main

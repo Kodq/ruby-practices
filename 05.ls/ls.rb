@@ -1,24 +1,25 @@
 # frozen_string_literal: true
+
 require 'optparse'
 
 WIDTH = 3
 
 def main
-  file_lists = fetch_file_list(fetch_option)
+  file_lists = fetch_files(fetch_option)
   sliced_lists = sliced_file_lists(file_lists)
   show_result(sliced_lists)
 end
 
 def fetch_option
-  file_type = 0
+  option = {}
   opt = OptionParser.new
-  opt.on('-a', 'all') { file_type = 1 }
+  opt.on('-a') { |a| option[:a] = a }
   opt.parse(ARGV)
-  file_type
+  option
 end
 
-def fetch_file_list(file_type)
-  if file_type == 1
+def fetch_files(option)
+  if option[:a]
     Dir.entries('.')
   else
     Dir.glob('*')

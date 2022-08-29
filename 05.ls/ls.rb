@@ -13,7 +13,6 @@ end
 def fetch_option
   option = {}
   opt = OptionParser.new
-  opt.on('-a') { |a| option[:a] = a }
   opt.on('-r') { |r| option[:r] = r }
   opt.parse(ARGV)
   option

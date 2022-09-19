@@ -6,6 +6,9 @@ require 'date'
 
 WIDTH = 3
 FILE = 6
+PERMISSON_TYPE = { '0' => '---', '1' => '--x', '2' => '-w-', '3' => '-wx', '4' => 'r--', '5' => 'r-x', '6' => 'rw-', '7' => 'rwx' }.freeze
+FILE_TYPE = { '01' => 'p', '02' => 'c', '04' => 'd', '06' => 'b', '10' => '-', '12' => 'l', '14' => 's' }.freeze
+DIRECTORY_TYPE = { '1' => 'p', '2' => 'c', '4' => 'd', '6' => 'b' }.freeze
 
 def main
   file_lists = fetch_files
@@ -43,7 +46,7 @@ end
 
 def show_detail(sliced_list)
   sliced_list.each do |list|
-    list.map do |name|
+    list.each do |name|
       file_stats = File.stat(name)
       stats_lists = []
 
@@ -57,8 +60,7 @@ def show_detail(sliced_list)
 
       show_lists = stats_lists.map { |stat| stat.to_s.ljust(5) }.join(' ')
 
-      print(show_lists)
-      puts
+      puts(show_lists)
     end
   end
 end
@@ -73,23 +75,19 @@ def get_mode(file_stats)
   else
     parsed_modes.push(parse_directory(split_mode))
   end
-
   parsed_modes.push(parse_permisson(split_mode)).flatten.join
 end
 
 def parse_file(split_modes)
-  file_type = { '01' => 'p', '02' => 'c', '04' => 'd', '06' => 'b', '10' => '-', '12' => 'l', '14' => 's' }
-  file_type[split_modes[0..1].join]
+  FILE_TYPE[split_modes[0..1].join]
 end
 
 def parse_directory(split_modes)
-  directory_type = { '1' => 'p', '2' => 'c', '4' => 'd', '6' => 'b' }
-  directory_type[split_modes[0]]
+  DIRECTORY_TYPE[split_modes[0]]
 end
 
 def parse_permisson(split_modes)
-  permisson_type = { '0' => '---', '1' => '--x', '2' => '-w-', '3' => '-wx', '4' => 'r--', '5' => 'r-x', '6' => 'rw-', '7' => 'rwx' }
-  split_modes.last(3).map { |mode| permisson_type[mode] }
+  split_modes.last(3).map { |mode| PERMISSON_TYPE[mode] }
 end
 
 main

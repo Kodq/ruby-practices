@@ -11,8 +11,12 @@ FILE_TYPE = { '01' => 'p', '02' => 'c', '04' => 'd', '06' => 'b', '10' => '-', '
 DIRECTORY_TYPE = { '1' => 'p', '2' => 'c', '4' => 'd', '6' => 'b' }.freeze
 
 def main
-  file_lists = fetch_files
+  file_lists = fetch_files(fetch_option)
+
+  file_lists = file_lists.reverse if fetch_option[:r]
+
   sliced_lists = sliced_file_lists(file_lists)
+
   if fetch_option[:l]
     show_detail(sliced_lists)
   else
@@ -23,13 +27,19 @@ end
 def fetch_option
   option = {}
   opt = OptionParser.new
-  opt.on('-l') { |r| option[:l] = r }
+  opt.on('-l') { |l| option[:l] = l }
+  opt.on('-r') { |r| option[:r] = r }
+  opt.on('-a') { |a| option[:a] = a }
   opt.parse(ARGV)
   option
 end
 
-def fetch_files
-  Dir.glob('*')
+def fetch_files(option)
+  if option[:a]
+    Dir.entries('.')
+  else
+    Dir.glob('*')
+  end
 end
 
 def sliced_file_lists(file_lists)

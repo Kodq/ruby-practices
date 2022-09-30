@@ -11,11 +11,14 @@ FILE_TYPE = { '01' => 'p', '02' => 'c', '04' => 'd', '06' => 'b', '10' => '-', '
 DIRECTORY_TYPE = { '1' => 'p', '2' => 'c', '4' => 'd', '6' => 'b' }.freeze
 
 def main
-  file_lists = fetch_files
-  sliced_lists = sliced_file_lists(file_lists)
+  file_lists = fetch_files(fetch_option)
+
+  file_lists = file_lists.reverse if fetch_option[:r]
+
   if fetch_option[:l]
-    show_detail(sliced_lists)
+    show_detail(file_lists)
   else
+    sliced_lists = sliced_file_lists(file_lists)
     show_result(sliced_lists)
   end
 end
@@ -23,13 +26,19 @@ end
 def fetch_option
   option = {}
   opt = OptionParser.new
-  opt.on('-l') { |r| option[:l] = r }
+  opt.on('-l') { |l| option[:l] = l }
+  opt.on('-r') { |r| option[:r] = r }
+  opt.on('-a') { |a| option[:a] = a }
   opt.parse(ARGV)
   option
 end
 
-def fetch_files
-  Dir.glob('*')
+def fetch_files(option)
+  if option[:a]
+    Dir.entries('.')
+  else
+    Dir.glob('*')
+  end
 end
 
 def sliced_file_lists(file_lists)
@@ -45,23 +54,21 @@ def show_result(sliced_lists)
 end
 
 def show_detail(sliced_list)
-  sliced_list.each do |list|
-    list.each do |name|
-      file_stats = File.stat(name)
-      stats_lists = []
+  sliced_list.each do |name|
+    file_stats = File.stat(name)
+    stats_lists = []
 
-      stats_lists.push(get_mode(file_stats))
-      stats_lists.push(file_stats.nlink)
-      stats_lists.push(Etc.getpwuid(file_stats.uid).name)
-      stats_lists.push(Etc.getgrgid(file_stats.gid).name)
-      stats_lists.push(file_stats.size)
-      stats_lists.push(file_stats.mtime.strftime('%m月%d %H:%M %Y'))
-      stats_lists.push(name)
+    stats_lists.push(get_mode(file_stats))
+    stats_lists.push(file_stats.nlink)
+    stats_lists.push(Etc.getpwuid(file_stats.uid).name)
+    stats_lists.push(Etc.getgrgid(file_stats.gid).name)
+    stats_lists.push(file_stats.size)
+    stats_lists.push(file_stats.mtime.strftime('%m月%d %H:%M %Y'))
+    stats_lists.push(name)
 
-      show_lists = stats_lists.map { |stat| stat.to_s.ljust(5) }.join(' ')
+    show_lists = stats_lists.map { |stat| stat.to_s.ljust(5) }.join(' ')
 
-      puts(show_lists)
-    end
+    puts(show_lists)
   end
 end
 

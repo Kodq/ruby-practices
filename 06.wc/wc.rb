@@ -7,15 +7,9 @@ def main
   option = fetch_option
 
   if FileTest.exist?(file_names.first.chomp)
-    if option.empty?
-      show_file_stats(file_names)
-    else
-      show_file_option_stats(file_names, fetch_option)
-    end
-  elsif option.empty?
-    show_stats(file_names)
+    show_file_stats(file_names, fetch_option)
   else
-    show_option_stats(file_names, fetch_option)
+    show_stats(file_names, option)
   end
 end
 
@@ -33,36 +27,33 @@ def fetch_option
   option
 end
 
-def show_stats(file_names)
+def show_stats(file_names, option)
   file_info = []
-  file_info.push(show_lines(file_names))
-  file_info.push(show_words(file_names))
-  file_info.push(show_bytes(file_names))
+
+  if option.empty?
+    option[:l] = true
+    option[:w] = true
+    option[:c] = true
+  end
+
+  file_info.push(show_lines(file_names)) if option[:l]
+  file_info.push(show_words(file_names)) if option[:w]
+  file_info.push(show_bytes(file_names)) if option[:c]
   puts(file_info.join(' '))
 end
 
-def show_file_stats(file_names)
+def show_file_stats(file_names, option)
   file_info = []
   save_info = []
 
-  file_names.each do |name|
-    name = name.chomp
-    file_info.push(show_file_lines(name))
-    file_info.push(show_file_words(name))
-    file_info.push(show_file_bytes(name))
-    file_info.push(name)
-    save_info.push(file_info) if file_names.size >= 2
-    puts(file_info.join(' '))
-    file_info = []
+  if option.empty?
+    option[:l] = true
+    option[:w] = true
+    option[:c] = true
   end
-  show_sum(save_info) if file_names.size >= 2
-end
-
-def show_file_option_stats(file_names, option)
-  file_info = []
-  save_info = []
 
   file_names.each do |name|
+    file_info = []
     name = name.chomp
     file_info.push(show_file_lines(name)) if option[:l]
     file_info.push(show_file_words(name)) if option[:w]
@@ -70,17 +61,8 @@ def show_file_option_stats(file_names, option)
     file_info.push(name)
     save_info.push(file_info) if file_names.size >= 2
     puts(file_info.join(' '))
-    file_info = []
   end
   show_sum(save_info) if file_names.size >= 2
-end
-
-def show_option_stats(file_names, option)
-  file_info = []
-  file_info.push(show_lines(file_names)) if option[:l]
-  file_info.push(show_words(file_names)) if option[:w]
-  file_info.push(show_bytes(file_names)) if option[:c]
-  puts(file_info.join(' '))
 end
 
 def show_sum(save_info)

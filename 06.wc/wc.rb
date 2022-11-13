@@ -31,7 +31,6 @@ def fetch_option
 end
 
 def show_stats(file_names, option, exist_file)
-  file_info = []
   save_info = []
 
   file_names.each do |name|
@@ -49,29 +48,27 @@ def show_stats(file_names, option, exist_file)
     save_info.push(file_info)
   end
 
-  if !exist_file
-    ls_info(save_info, option)
-  elsif file_names.size >= 2
-    show_sum(save_info)
-  end
+  show_sum(save_info, exist_file, option)
 end
 
-def ls_info(save_info, option)
-  show_info = []
-  replace_info = save_info.transpose
-
-  show_info.push(replace_info[0].size) if option[:l]
-  show_info.push(replace_info[1].sum) if option[:w]
-  show_info.push(replace_info[2].sum) if option[:c]
-
-  puts(show_info.join(' '))
-end
-
-def show_sum(save_info)
+def show_sum(save_info, exist_file, option)
   swap_info = save_info.transpose
-  swap_info.pop
-  sum_info = swap_info.map(&:sum)
-  print("#{sum_info.join(' ')} Total")
+
+  if save_info.size >= 2 && exist_file
+    swap_info.pop
+    sum_info = swap_info.map(&:sum)
+    puts("#{sum_info.join(' ')} Total")
+  end
+
+  return if exist_file
+
+  sum_info = []
+
+  sum_info.push(swap_info[0].size) if option[:l]
+  sum_info.push(swap_info[1].sum) if option[:w]
+  sum_info.push(swap_info[2].sum) if option[:c]
+
+  puts(sum_info.join(' '))
 end
 
 def show_lines(file_name, exist_file)

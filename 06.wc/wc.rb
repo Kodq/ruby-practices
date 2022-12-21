@@ -5,15 +5,15 @@ require 'optparse'
 def main
   file_names = fetch_name
   option = fetch_option
+  pipe = File.pipe?($stdin)
 
   if option.empty?
-    option[:l] = true
-    option[:w] = true
-    option[:c] = true
+    option[:lines] = true
+    option[:words] = true
+    option[:chars] = true
   end
 
-  exist_file = FileTest.exist?(file_names.first.chomp)
-  show_stats(file_names, option, exist_file)
+  show_stats(file_names, option, pipe)
 end
 
 def fetch_name
@@ -23,77 +23,73 @@ end
 def fetch_option
   option = {}
   opt = OptionParser.new
-  opt.on('-l') { |l| option[:l] = l }
-  opt.on('-w') { |w| option[:w] = w }
-  opt.on('-c') { |c| option[:c] = c }
+  opt.on('-l') { |l| option[:lines] = l }
+  opt.on('-w') { |w| option[:words] = w }
+  opt.on('-c') { |c| option[:chars] = c }
   opt.parse(ARGV)
   option
 end
 
-def show_stats(file_names, option, exist_file)
-  save_info = []
+def show_stats(file_names, option, pipe)
+  total_infos = { lines: 0, words: 0, bytes: 0 }
+  select_option = option.select { |_k, v| v == true }
+  input_contents = File.read(name)
 
+  saves_info = []
   file_names.each do |name|
-    file_info = []
+    file_infos = []
     name = name.chomp
-    file_info.push(show_lines(name, exist_file)) if option[:l]
-    file_info.push(show_words(name, exist_file)) if option[:w]
-    file_info.push(show_bytes(name, exist_file)) if option[:c]
 
-    if exist_file
-      file_info.push(name)
-      puts(file_info.join(' '))
+    file_infos.push(show_lines(input_contents))
+    file_infos.push(show_words(input_contents))
+    file_infos.push(show_bytes(name, pipe))
+
+    total_infos[:lines] = file_infos[0]
+    total_infos[:words] = file_infos[1]
+    total_infos[:chars] = file_infos[2]
+
+    unless pipe
+      select_option.each_key { |key| print("#{total_infos.values_at(key)[0]} ") }
+      puts(name)
     end
 
-    save_info.push(file_info)
+    saves_info.push(file_infos)
   end
 
-  show_sum(save_info, exist_file, option)
+  show_sum(saves_info, pipe, option) if saves_info.size >= 2
 end
 
-def show_sum(save_info, exist_file, option)
-  swap_info = save_info.transpose
+def show_sum(saves_info, pipe, option)
+  swap_infos = saves_info.transpose
+  select_option = option.select { |_k, v| v == true }
+  total_infos = { lines: 0, words: 0, chars: 0 }
 
-  if save_info.size >= 2 && exist_file
-    swap_info.pop
-    sum_info = swap_info.map(&:sum)
-    puts("#{sum_info.join(' ')} Total")
-  end
+  total_infos[:words] += swap_infos[1].sum
+  total_infos[:chars] += swap_infos[2].sum
 
-  return if exist_file
-
-  sum_info = []
-
-  sum_info.push(swap_info[0].size) if option[:l]
-  sum_info.push(swap_info[1].sum) if option[:w]
-  sum_info.push(swap_info[2].sum) if option[:c]
-
-  puts(sum_info.join(' '))
-end
-
-def show_lines(file_name, exist_file)
-  if exist_file
-    File.read(file_name).count("\n")
+  if pipe
+    total_infos[:lines] += swap_infos[0].size
+    select_option.each_key { |key| print("#{total_infos.values_at(key)[0]} ") }
   else
-    file_name.size
+    total_infos[:lines] += swap_infos[0].sum
+    select_option.each_key { |key| print("#{total_infos.values_at(key)[0]} ") }
+    print('Total')
   end
 end
 
-def show_words(file_name, exist_file)
-  if exist_file
-    File.read(file_name).split(' ').size
-  else
-    word_count = []
-    word_count.push(file_name.split(' '))
-    word_count.flatten.size
-  end
+def show_lines(input_contents)
+  input_contents.count("\n")
 end
 
-def show_bytes(file_name, exist_file)
-  if exist_file
-    File.size(file_name)
-  else
+def show_words(inputs_contents)
+  inputs_contents.split(' ').size
+end
+
+def show_bytes(file_name, pipe)
+  if pipe
     file_name.bytesize
+  else
+    File.size(file_name)
   end
 end
 

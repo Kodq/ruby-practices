@@ -7,12 +7,12 @@ def main
   inputs = $stdin.readlines
 
   input_names = if inputs.empty?
-                  fetch_file
+                  fetch_file(option)
                 else
                   inputs
                 end
 
-  if option.empty?
+  if option.values.none?
     option[:lines] = true
     option[:words] = true
     option[:chars] = true
@@ -22,8 +22,8 @@ def main
 end
 
 def show_stats(input_names, inputs, option)
-  total_infos = { lines: 0, words: 0, bytes: 0 }
-  select_option = option.select { |_k, v| v == true }
+  total_infos = { lines: 0, words: 0, chars: 0 }
+  select_option = option.select { |_k, v| v }
 
   saves_info = []
 
@@ -41,7 +41,7 @@ def show_stats(input_names, inputs, option)
     total_infos[:chars] = file_infos[2]
 
     if inputs.empty?
-      select_option.each_key { |key| print("#{total_infos.values_at(key)[0]} ") }
+      select_option.each_key { |k| print("#{total_infos.values_at(k)[0]} ") }
       puts(name)
     end
 
@@ -53,7 +53,7 @@ end
 
 def show_sum(saves_info, inputs, option)
   swap_infos = saves_info.transpose
-  select_option = option.select { |_k, v| v == true }
+  select_option = option.select { |_k, v| v }
   total_infos = { lines: 0, words: 0, chars: 0 }
 
   total_infos[:words] += swap_infos[1].sum
@@ -63,9 +63,9 @@ def show_sum(saves_info, inputs, option)
   print 'Total' if inputs.empty?
 end
 
-def fetch_file
+def fetch_file(option)
   file_names = ARGV
-  file_names.pop unless fetch_option.empty?
+  file_names.pop if option.values.any?
   file_names
 end
 
@@ -80,7 +80,7 @@ def argv_of_input(name, inputs)
 end
 
 def fetch_option
-  option = {}
+  option = { lines: false, words: false, chars: false }
   opt = OptionParser.new
   opt.on('-l') { |l| option[:lines] = l }
   opt.on('-w') { |w| option[:words] = w }

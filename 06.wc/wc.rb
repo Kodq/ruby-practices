@@ -9,8 +9,8 @@ def main
 
   input_names = if argv_lists.empty?
                   $stdin.readlines
-                elsif File.exist?(argv_lists.first)
-                  fetch_file(option)
+                else
+                  argv_lists
                 end
 
   if option.values.none?
@@ -62,7 +62,7 @@ def show_sum(save_infos, argv_lists, option)
   total_infos[:lines] += argv_lists.empty? ? swap_infos[0].size : swap_infos[0].sum
 
   select_option.each_key { |key| print("#{total_infos.values_at(key)[0]} ") }
-  print 'Total' unless argv_lists.empty?
+  puts 'Total' unless argv_lists.empty?
 end
 
 def argv_or_input(name, argv_lists)

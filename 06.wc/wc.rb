@@ -3,9 +3,7 @@
 require 'optparse'
 
 def main
-  option = fetch_option
-
-  argv_lists = ARGV
+  option, argv_lists = fetch_option
 
   input_names = if argv_lists.empty?
                   $stdin.readlines
@@ -81,11 +79,9 @@ def fetch_option
   opt.on('-l') { |l| option[:lines] = l }
   opt.on('-w') { |w| option[:words] = w }
   opt.on('-c') { |c| option[:chars] = c }
-  opt.parse(ARGV)
+  argv_lists = opt.parse(ARGV)
 
-  ARGV.pop if option.values.any?
-
-  option
+  [option, argv_lists]
 end
 
 def show_lines(input_contents)
